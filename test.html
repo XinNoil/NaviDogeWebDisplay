@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+	<div id="showMap" width="400" height="68.1510164569216" style="display: block;position:relative;top:85px;left:32px;">
+		<div id="map" width="400" height="68.1510164569216" style="display: block;position:absolute;z-index:-1"></div>
+		<div id="box" style="height:68.1510164569216px;width:400px;position:absolute"></div>
+	</div>
+    
+    <div id = "playControl" style="position:relative;top:200px;left:40px">
+
+	    <input id="playSpeed" data-slider-id='playSpeedSlider' type="text" data-slider-min="1" data-slider-max="8" data-slider-step="1" data-slider-value="1";style="background: #BABABA;"/>
+	    <br/>
+	    <br/>
+	    <input id="ex1" data-slider-id='ex1Slider' type="text" data-slider-min="0" data-slider-max="15" data-slider-step="1" data-slider-value="0";style="background: #BABABA;"/>
+	    <input id='play' type="button"  onclick='startpause()'/>
+	    <input id='loadMap' type="button" onclick='loadMap()'/>
+	    <input id='addPerson' type="button" onclick='addPerson()'/>
+	    <input id='test' type="button" onclick='test()'/>
+    </div>
+	<div class="btn-group" role="group" aria-label="..." style="position:relative;top:-55px;left:29px;">
+	  <button type="button" class="btn btn-default" onclick='test()'>实时定位</button>
+	  <button type="button" class="btn btn-default">历史记录</button>
+	</div>
+    <script src="./jquery-3.3.1.min.js"></script>
+    <script src="./zrender.min.js"></script>
+    <script src="./bootstrap-slider.js"></script>	
+	<script src="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap-theme.min.css"></script>
+	<script src="https://cdn.bootcss.com/jquery/2.1.1/jquery.min.js"></script>
+	<script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+	<script src="./socket.io.js"></script>	
+	<link rel="stylesheet" media="screen" href="./bootstrap-slider.css">
+	<link href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+
+    <script>
+
+    	var poxy = [[0,0],[10,10],[15,10],[20,18],[30,25],[38,36],[45,40],[50,40],[65,40],[75,40],[85,40],[95,40],[100,40],[115,40],[125,40],[135,60]];
+    	var playSlider = new Slider('#ex1');
+    	var playSpeedSlider = new Slider('#playSpeed');
+    	playSlider.on("change",update);
+    	playSpeedSlider.on("change",changeSpeed);
+		var now=0,playing = false;
+    	var timer;
+    	var maxtime = 16;
+    	var speed = 200;
+    	var speed_scale = 1;
+
+
+
+
+        var zr = zrender.init(document.getElementById('box')),
+        	h = zr.getHeight(),
+        	w = zr.getWidth()
+
+        var r = 3;
+    	// var circle = new zrender.Circle({
+	    //     shape: {
+	    //         cx: r,
+	    //         cy: h / 2,
+	    //         r: r
+	    //     },
+	    //     style: {
+	    //         fill: 'red',
+	    //         // stroke: '#FF6EBE'     
+	    //     },
+	    //     name:"152",
+	    //     silent: false
+    	// });	
+
+    	// var line = new zrender.Polyline({
+    	// 	shape:{
+    	// 		points:poxy,
+    	// 		smooth:0.1
+    	// 	},
+    	// 	style:{
+    	// 		lineWidth:1,
+    	// 		stroke:'green'
+    	// 	}
+    	// })
+
+  //   	circle.on("click",function(params) {
+  //   		circle.attr('shape', {
+  //   				cx: 10,
+  //   				cy: 10,
+		// 		})
+		// 	}
+		// )
+
+        // zr.add(circle);
+        // zr.add(line);
+
+
+        function play(){
+        	// if(playing){return}
+   //      	playing = true;
+   //      	circle.attr('shape', {
+			// 	cx: poxy[now][0],
+			// 	cy: poxy[now][1],
+			// })
+   //      	now++;
+   //      	now = now%maxtime;
+   //      	playSlider.setValue(now);
+   //      	timer = setTimeout(play, speed*speed_scale);
+		}
+
+		function startpause(){
+			if(playing){
+				stopplay()
+			}else{
+				timer = setTimeout(play, speed*speed_scale);
+				console.log("started");
+			}
+		}
+		
+
+		function stopplay(){
+			clearTimeout(timer);
+			playing = false;
+			console.log("stopped");
+		}
+
+		function update(e){
+			if(playing){stopplay()}
+			now = e.newValue;
+			console.log(circle.name);
+			// console.log(poxy[e.newValue]);
+			circle.attr('shape', {
+				cx: poxy[e.newValue][0],
+				cy: poxy[e.newValue][1],
+			})
+
+		}
+
+		function changeSpeed(e){
+			console.log(e.newValue);				
+			speed_scale = 1/e.newValue;
+		}
+
+		function loadMap(){
+
+			$.ajax("http://knoil.cn:8080/floorplan", {  
+					type:'POST',
+					data : '{"filename":"55_5.svg"}',  
+					success: function(data,status) {
+						$("#map").empty();
+						$("#map").append(data);
+					},
+					error: function(data,status){
+						alert('error');
+						console.log(data);
+					}
+				}
+			);  
+		}
+		
+
+
+		var liveGroup = new zrender.Group();
+		zr.add(liveGroup);
+		var lastTimeOnline = new Array();
+
+		function addPerson(name,x,y){
+			var newPerson = new zrender.Circle({
+		        shape: {
+		            cx: x,
+		            cy: y,
+		            r: r
+		        },
+		        style: {
+		            fill: 'red',
+		            // stroke: '#FF6EBE'     
+		        },
+		        name:name,
+		        silent: false
+    		});	
+			newPerson.animateTo({
+			    style: {
+			        opacity: 0
+			    }
+			}, 900, 0, null, function () {
+			    // console.log(" done");
+			})
+    		// console.log(newPerson.name+" added");
+    		liveGroup.add(newPerson);
+
+    		setTimeout(function(){liveGroup.remove(newPerson);}, 1000);
+		}	
+
+		function test(rejson){
+			// var nowOnline = new Array();
+			console.log(nowOnline.includes(54));
+			
+			var rejson = '{"code":"1","results":[{"id":"person1","x":"20","y":"10"},{"id":"person2","x":"30","y":"14"}]}';
+			var persons = JSON.parse(rejson);
+			if(persons.code!=1){return;}else{persons = persons.results;}
+			// for (var i=0;i<persons.length;i++){
+			// 	nowOnline.push(persons[i].id);
+			// }
+			// for (var i=0;i<lastTimeOnline.length;i++){  //O(n^3)
+			// 	if(!nowOnline.includes(lastTimeOnline[i])){
+			// 		liveGroup.remove(liveGroup.childOfName(lastTimeOnline[i]));
+			// 	}
+			// }
+			// lastTimeOnline = nowOnline;
+			for (var i=0;i<persons.length;i++){ 
+
+			    already = liveGroup.childOfName(persons[i].id);
+			    if(already==undefined){
+			    	addPerson(persons[i].id,persons[i].x,persons[i].y);
+				}else{
+					already.attr('shape', {
+						cx: persons[i].x,
+						cy: persons[i].y,
+					})
+				}
+			}
+
+		}
+
+		var socket = io.connect('http://123.206.89.235:8080');
+		socket.on('locate result',function(data){
+			console.log("newPosition:");
+			console.log("x: "+(data['coordinate'][0]+1.34)+"  y: "+(data['coordinate'][1]+7.5));
+			console.log("--------------------------------");
+			already = liveGroup.childOfName(data['session'].toString());
+		    if(already==undefined){
+		    	addPerson(data['session'],data['coordinate'][0]+1.34,data['coordinate'][1]+7.5);
+			}else{
+				already.attr('shape', {
+					cx: data['coordinate'][0]+1.34,
+					cy: data['coordinate'][1]+7.5,
+				})
+			}
+		});
+		socket.on('connect', () => {
+		  console.log("socket.connected"); // true
+		});
+        
+    </script>
+
+
+</body>
+
+</html>
