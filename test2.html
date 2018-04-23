@@ -91,7 +91,7 @@
 				<a href="#">  >  4层</a>
 			</ul>
 			<ul>
-				<a href="#">  >  5层</a>
+				<a href="javascript:void(0)" onclick="loadMap()">  >  5层</a>
 			</ul>
 
 		</li>
@@ -99,14 +99,120 @@
 		
 		
 	</div>
-	<div class='contentMapArea'>
-		<img class='Map' src="./images/map.png">
+	<div class='contentMapArea' id='map'>
+
+		<!-- <img class='Map' src="./images/map.png"> -->
 	</div>
 	<div class='contentDataArea'>
 		
 	</div>
 </div>
 
+<script type="text/javascript">
+
+	var zr = zrender.init(document.getElementById('map'));
+	function loadMap(){
+		$.ajax("http://knoil.cn:8080/floorplan", {  
+				type:'POST',
+				data : JSON.stringify({"filename":"55_5.svg"}),  
+				contentType:"application/json",
+				success: function(data,status) {
+					$("#map").empty();
+					$("#map").append(data);
+					console.log(data);
+				},
+				error: function(data,status){
+					alert('error');
+					console.log(data);
+				}
+			}
+		);  
+	}
+
+
+	var liveGroup = new zrender.Group();
+		zr.add(liveGroup);
+		var lastTimeOnline = new Array();
+
+		function addPerson(name,x,y){
+            x=x*3.55;
+            y=y*3.55;
+			var newPerson = new zrender.Circle({
+		        shape: {
+		            cx: x,
+		            cy: y,
+		            r: r
+		        },
+		        style: {
+		            fill: 'red',
+		            // stroke: '#FF6EBE'     
+		        },
+		        name:name,
+		        silent: false
+    		});	
+			newPerson.animateTo({
+			    style: {
+			        opacity: 0
+			    }
+			}, 900, 0, null, function () {
+			    // console.log(" done");
+			})
+    		// console.log(newPerson.name+" added");
+    		liveGroup.add(newPerson);
+
+    		setTimeout(function(){liveGroup.remove(newPerson);}, 1000);
+		}	
+
+		function test(rejson){
+			// var nowOnline = new Array();
+			console.log(nowOnline.includes(54));
+			
+			var rejson = '{"code":"1","results":[{"id":"person1","x":"20","y":"10"},{"id":"person2","x":"30","y":"14"}]}';
+			var persons = JSON.parse(rejson);
+			if(persons.code!=1){return;}else{persons = persons.results;}
+			// for (var i=0;i<persons.length;i++){
+			// 	nowOnline.push(persons[i].id);
+			// }
+			// for (var i=0;i<lastTimeOnline.length;i++){  //O(n^3)
+			// 	if(!nowOnline.includes(lastTimeOnline[i])){
+			// 		liveGroup.remove(liveGroup.childOfName(lastTimeOnline[i]));
+			// 	}
+			// }
+			// lastTimeOnline = nowOnline;
+			for (var i=0;i<persons.length;i++){ 
+
+			    already = liveGroup.childOfName(persons[i].id);
+			    if(already==undefined){
+			    	addPerson(persons[i].id,persons[i].x,persons[i].y);
+				}else{
+					already.attr('shape', {
+						cx: persons[i].x,
+						cy: persons[i].y,
+					})
+				}
+			}
+
+		}
+
+		var socket = io.connect('http://123.206.89.235:8080');
+		socket.on('locate result',function(data){
+			console.log("newPosition:");
+			console.log("x: "+(data['coordinate'][0]+1.34)+"  y: "+(data['coordinate'][1]+7.5));
+			console.log("--------------------------------");
+			already = liveGroup.childOfName(data['session'].toString());
+		    if(already==undefined){
+		    	addPerson(data['session'],data['coordinate'][0]+1.34,data['coordinate'][1]+7.5);
+			}else{
+				already.attr('shape', {
+					cx: data['coordinate'][0]+1.34,
+					cy: data['coordinate'][1]+7.5,
+				})
+			}
+		});
+		socket.on('connect', () => {
+		  console.log("socket.connected"); // true
+		});
+</script>
 
 </body>
 </html>

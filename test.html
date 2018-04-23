@@ -145,7 +145,7 @@
 
 			$.ajax("http://knoil.cn:8080/floorplan", {  
 					type:'POST',
-					data : {"filename":"55_5.svg"},  
+					data : JSON.stringify({"filename":"55_5.svg"}),  
 					contentType:"application/json",
 					success: function(data,status) {
 						$("#map").empty();

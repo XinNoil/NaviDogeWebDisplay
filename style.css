@@ -46,7 +46,7 @@ a{text-decoration:none;}
 	background-color:#66CCFF;
 	height: 100px;
 	float:left;
-	width:553px;
+	width:535px;
 
 }
 
@@ -78,7 +78,7 @@ a{text-decoration:none;}
 	padding:0;
 	background-color: #666666;
 	height: 912px;
-	width:553px;
+	width:535px;
 }
 
 .buildingSelect{
@@ -116,7 +116,7 @@ a{text-decoration:none;}
 
 .contentMapArea{
 	float:left;
-	width:1000px;
+	width:1366px;
 	height: 650px;
 	/*background-color: black;*/
 }
@@ -129,4 +129,11 @@ a{text-decoration:none;}
 	display:block; 
 	height: 580px;
 	padding-top: 2px;
+}
+
+
+svg{
+	width:100%;
+	display:block; 
+	margin-top:20%;
 }
