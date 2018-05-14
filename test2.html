@@ -28,8 +28,8 @@
 
 	<div class='topButton'>
 
-		<a href="">
-			<img class='topButtonImg' src='./images/jiankong.png' >
+		<a href="javascript:void(0)" onclick="test2()">
+			<img class='topButtonImg' src='./images/jiankong.png' ">
 
 		</a>
 	</div>
@@ -66,42 +66,45 @@
 <div class='content'>
 	<div class='contentLeftBar'>
 
-	<div class='leftQuyu'>
-		<p class="leftQuyuP">区域</p>
-		<select class='buildingSelect'>
-			  <option value ="volvo">55楼</option>
-			  <option value ="saab">33楼</option>
-			  <option value="opel">45楼</option>
-			  <option value="audi">47楼</option>
-		</select>
-	</div>
+		<div class='leftQuyu'>
+			<p class="leftQuyuP">区域</p>
+			<select class='buildingSelect'>
+				  <option value ="volvo">55楼</option>
+				  <option value ="saab">33楼</option>
+				  <option value="opel">45楼</option>
+				  <option value="audi">47楼</option>
+			</select>
+		</div>
 
-	<div class="leftLouceng">
-		<li>
-			<ul>
-				<a href="#">  >  1层</a>
-			</ul>
-			<ul>
-				<a href="#">  >  2层</a>
-			</ul>
-			<ul>
-				<a href="#">  >  3层</a>
-			</ul>
-			<ul>
-				<a href="#">  >  4层</a>
-			</ul>
-			<ul>
-				<a href="javascript:void(0)" onclick="loadMap()">  >  5层</a>
-			</ul>
+		<div class="leftLouceng">
+			<li>
+				<ul>
+					<a href="#">  >  1层</a>
+				</ul>
+				<ul>
+					<a href="javascript:void(0)" onclick="loadMap(2)">  >  2层</a>
+				</ul>
+				<ul>
+					<a href="#">  >  3层</a>
+				</ul>
+				<ul>
+					<a href="#">  >  4层</a>
+				</ul>
+				<ul>
+					<a href="javascript:void(0)" onclick="loadMap(5)">  >  5层</a>
+				</ul>
 
-		</li>
-	</div>
+			</li>
+		</div>
 		
+	</div>	
+
+	<div id="box" class='box'>
 		
+		<!-- <img class='Map' src="./images/map.png"> -->
 	</div>
 	<div class='contentMapArea' id='map'>
-
-		<!-- <img class='Map' src="./images/map.png"> -->
+		</div>
 	</div>
 	<div class='contentDataArea'>
 		
@@ -110,16 +113,17 @@
 
 <script type="text/javascript">
 
-	var zr = zrender.init(document.getElementById('map'));
-	function loadMap(){
+	var zr = zrender.init(document.getElementById('box'));
+	function loadMap(mapIndex){
+		var mapName = "55_"+mapIndex+".svg";
 		$.ajax("http://knoil.cn:8080/floorplan", {  
 				type:'POST',
-				data : JSON.stringify({"filename":"55_5.svg"}),  
+				data : JSON.stringify({"filename":mapName}),  
 				contentType:"application/json",
 				success: function(data,status) {
 					$("#map").empty();
 					$("#map").append(data);
-					console.log(data);
+					// console.log(data);
 				},
 				error: function(data,status){
 					alert('error');
@@ -130,18 +134,20 @@
 	}
 
 
-	var liveGroup = new zrender.Group();
+		var liveGroup = new zrender.Group();
 		zr.add(liveGroup);
 		var lastTimeOnline = new Array();
+		var r = 3;	
+		var ratio = 11.1331;
 
 		function addPerson(name,x,y){
-            x=x*3.55;
-            y=y*3.55;
+            x=x;
+            y=y;
 			var newPerson = new zrender.Circle({
 		        shape: {
 		            cx: x,
 		            cy: y,
-		            r: r
+		            r: 15
 		        },
 		        style: {
 		            fill: 'red',
@@ -197,21 +203,26 @@
 		var socket = io.connect('http://123.206.89.235:8080');
 		socket.on('locate result',function(data){
 			console.log("newPosition:");
-			console.log("x: "+(data['coordinate'][0]+1.34)+"  y: "+(data['coordinate'][1]+7.5));
+			console.log("x: "+(data['coordinate'][0])+"  y: "+(data['coordinate'][1]));
 			console.log("--------------------------------");
 			already = liveGroup.childOfName(data['session'].toString());
 		    if(already==undefined){
-		    	addPerson(data['session'],data['coordinate'][0]+1.34,data['coordinate'][1]+7.5);
+		    	addPerson(data['session'],data['coordinate'][0]*ratio,data['coordinate'][1]*ratio);
 			}else{
 				already.attr('shape', {
-					cx: data['coordinate'][0]+1.34,
-					cy: data['coordinate'][1]+7.5,
+					cx: data['coordinate'][0]*ratio,
+					cy: data['coordinate'][1]*ratio,
 				})
 			}
 		});
 		socket.on('connect', () => {
 		  console.log("socket.connected"); // true
 		});
+
+		function test2(){
+			addPerson("peter",15,15);
+		}
+		loadMap(2);
 </script>
 
 </body>

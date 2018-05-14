@@ -33,7 +33,7 @@ a{text-decoration:none;}
 
 .logoimg{
 	float:left;
-	padding-left: 90px;
+	padding-left: 40px;
 	padding-top: 11px;
 }
 .logoa{
@@ -46,7 +46,7 @@ a{text-decoration:none;}
 	background-color:#66CCFF;
 	height: 100px;
 	float:left;
-	width:535px;
+	width:400px;
 
 }
 
@@ -56,7 +56,7 @@ a{text-decoration:none;}
 	display:inline;
 	background-color:#0080FF;
 	height: 100px;
-	width:339px;
+	width:409px;
 	margin-left:2px;
 }
 
@@ -78,13 +78,13 @@ a{text-decoration:none;}
 	padding:0;
 	background-color: #666666;
 	height: 912px;
-	width:535px;
+	width:400px;
 }
 
 .buildingSelect{
 	float:left;
 	padding-top: 2px;
-	width:505px;
+	width:390px;
 	height:40px;
 	font-size:24px;
 }
@@ -114,10 +114,21 @@ a{text-decoration:none;}
 
 /*content_right*/
 
+.box{
+	/*float:left;*/
+	position:absolute;
+	left:420px;
+	top:120px;
+	width:1574px;
+	height: 789px;
+	/*background-color: black;*/
+}
 .contentMapArea{
-	float:left;
-	width:1366px;
-	height: 650px;
+	position:absolute;
+/*	width:1366px;
+	height: 650px;*/
+	left:420px;
+	top:120px;
 	/*background-color: black;*/
 }
 
@@ -133,7 +144,8 @@ a{text-decoration:none;}
 
 
 svg{
-	width:100%;
+	/*width:100%;*/
 	display:block; 
-	margin-top:20%;
+	margin-top:0;
+	margin-left:0;
 }
